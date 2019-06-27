@@ -1,6 +1,17 @@
 from bs4 import BeautifulSoup
 import requests
 
+class Movie:
+    def __init__(self, title, year, director, stars, genres, country, storyline):
+        self.title = title
+        self.year = year
+        self.director = director
+        self.stars = stars
+        self.genres = genres
+        self.country = country
+        self.storyline = storyline
+
+
 
 def get_possible_films_list(film_title: str) -> []:
     """
