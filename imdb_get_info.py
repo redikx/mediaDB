@@ -1,16 +1,23 @@
 from bs4 import BeautifulSoup
 import requests
 
+
 class Movie:
-    def __init__(self, title, year, director, stars, genres, country, storyline):
+    def __init__(self, tt, title, stars = None, genres = None, country='', storyline='', year='', director='' ):
+        self.tt = tt
         self.title = title
         self.year = year
         self.director = director
-        self.stars = stars
-        self.genres = genres
+        self.stars = []
+        self.genres = []
         self.country = country
         self.storyline = storyline
 
+    def __str__(self):
+        return "Title : {} \n" \
+               "tt : {} \n" \
+               "Directory : {} \n" \
+               "Year : {}".format(self.title, self.tt, self.director, self.year)
 
 
 def get_possible_films_list(film_title: str) -> []:
@@ -36,6 +43,30 @@ def get_possible_films_list(film_title: str) -> []:
             movie_list.append([str(i).split(">")[1].strip('<a href="/title/'), str(i).split(">")[2].strip("</a")])
     return movie_list
 
-def get_film_details(tt):
+
+def get_film_details_page(tt, title):
+    movie = Movie(tt,title)
+    """Function that create sets of Movie objects that match film title
+    :param tt:tt in imdb
+    :param title:title of the movie"""
     url_movie = 'https://www.imdb.com/title/tt' + str(tt) + '/?ref_=fn_tt_tt_1'
     print(url_movie)
+    resp = requests.get(url_movie)
+    html_soup = BeautifulSoup(resp.text, 'html.parser')
+    type(html_soup)
+    movie_det1 = html_soup.find('div', class_='title_wrapper')
+
+# Extract year
+    try:
+        year = movie_det1.h1.a.text
+    except:
+        year = ''
+    movie.year = year
+
+# Extract director
+    movie_dir_stars = html_soup.find('div', class_='credit_summary_item')
+    for i in movie_dir_stars:
+        if "<a href" in str(i):
+            director = str(i).split(">")[1].strip("</a")
+            movie.director = director
+    print(movie)
