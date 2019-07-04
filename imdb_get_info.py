@@ -3,21 +3,22 @@ import requests
 
 
 class Movie:
-    def __init__(self, tt, title, stars = None, genres = None, country='', storyline='', year='', director='' ):
+    def __init__(self, tt, title, stars = None, genres = None, country=None, storyline='', year='', director='' ):
         self.tt = tt
         self.title = title
         self.year = year
         self.director = director
         self.stars = []
         self.genres = []
-        self.country = country
+        self.country = []
         self.storyline = storyline
 
     def __str__(self):
         return "Title : {} \n" \
                "tt : {} \n" \
                "Directory : {} \n" \
-               "Year : {}".format(self.title, self.tt, self.director, self.year)
+               "Year : {}\n" \
+               "Country : {}".format(self.title, self.tt, self.director, self.year, self.country)
 
 
 def get_possible_films_list(film_title: str) -> []:
@@ -69,4 +70,17 @@ def get_film_details_page(tt, title):
         if "<a href" in str(i):
             director = str(i).split(">")[1].strip("</a")
             movie.director = director
+
+# Extract country
+    movie_country = html_soup.find('div', id='titleDetails')
+    #print(movie_country.find('div',class_='txt-block'))
+    m_c2 = movie_country.find('div', class_='txt-block')
+    for i in m_c2:
+        queue = 0
+        if "country" in str(i):
+            country_f = ''
+            for j in str(i).split(">")[1].split("<")[0]:
+                country_f = country_f + j
+            movie.country.append(country_f)
+
     print(movie)
