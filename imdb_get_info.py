@@ -41,10 +41,12 @@ def get_possible_films_list(film_title: str) -> []:
     for i in movie_found:
         if '<td class="result_text"> <a href="/title' in str(i) and 'Episode' not in str(i) \
                 and '(Short)' not in str(i) and '(Video)' not in str(i) \
+                and '(TV Mini-Series' not in str(i) \
                 and '(TV Series)' not in str(i) and '(in development)' not in str(i) \
                 and '(Video Game)' not in str(i) and '(TV Movie)' not in str(i) \
-                and 'Documentary' not in str(i) and film_title in str(i):
-            movie_list.append([str(i).split(">")[1].strip('<a href="/title/'), str(i).split(">")[2].strip("</a")])
+                and 'Documentary' not in str(i) and film_title in str(i) \
+                and film_title in str(i).split(">")[2].split("<")[0]:
+                    movie_list.append([str(i).split(">")[1].strip('<a href="/title/'), str(i).split(">")[2].strip("</a")])
     return movie_list
 
 
