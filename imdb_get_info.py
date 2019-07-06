@@ -19,7 +19,8 @@ class Movie:
                "Directory : {} \n" \
                "Year : {}\n" \
                "Country : {} \n" \
-               "Genres : {}".format(self.title, self.tt, self.director, self.year, self.country, self.genres)
+               "Genres : {} \n" \
+               "Stars : {}".format(self.title, self.tt, self.director, self.year, self.country, self.genres, self.stars)
 
 
 def get_possible_films_list(film_title: str) -> []:
@@ -89,7 +90,6 @@ def get_film_details_page(tt, title):
 
     # Extract genres
     movie_genres = html_soup.find('div', id="titleStoryLine")
-    #print(movie_genres)
     movie_genres_2 = movie_genres.find_all('div', class_="see-more inline canwrap")
     for i in str(movie_genres_2).split('\n'):
          genre_f = ''
@@ -97,5 +97,22 @@ def get_film_details_page(tt, title):
             for j in str(i).split(">")[1].split("<")[0].strip(' '):
                 genre_f = genre_f + j
             movie.genres.append(genre_f)
+
+    # Extract stars
+    movie_stars = html_soup.find('div', class_='plot_summary')
+    stars_line=False
+    for i in str(movie_stars).split('>'):
+        if "Stars" in i:
+            #print(str(j) + " : " + str(i))
+            stars_line = True
+
+        if stars_line is False:
+            continue
+        else:
+            if "<a href" not in str(i) and "<span" not in str(i) and "</a" in str(i) and "See full" not in str(i):
+                artist = str(i).strip("</a")
+                movie.stars.append(artist)
+
+
 
     print(movie)
