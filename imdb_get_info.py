@@ -3,7 +3,7 @@ import requests
 
 
 class Movie:
-    def __init__(self, tt, title, stars=None, genres=None, country=None, storyline='', year='', director=''):
+    def __init__(self, tt, title, stars=None, genres=None, country=None, storyline='', year='', director='', url_movie=''):
         self.tt = tt
         self.title = title
         self.year = year
@@ -12,6 +12,7 @@ class Movie:
         self.genres = []
         self.country = []
         self.storyline = storyline
+        self.url_movie = url_movie
 
     def __str__(self):
         return "Title : {} \n" \
@@ -20,7 +21,9 @@ class Movie:
                "Year : {}\n" \
                "Country : {} \n" \
                "Genres : {} \n" \
-               "Stars : {}".format(self.title, self.tt, self.director, self.year, self.country, self.genres, self.stars)
+               "Stars : {} \n" \
+               "Storyline : {} \n" \
+               "IMDB link : {}".format(self.title, self.tt, self.director, self.year, self.country, self.genres, self.stars, self.storyline, self.url_movie)
 
 
 def get_possible_films_list(film_title: str) -> []:
@@ -31,34 +34,34 @@ def get_possible_films_list(film_title: str) -> []:
     """
 
     film_search = film_title.replace(' ', '+')
-    url_movie = 'https://www.imdb.com/find?ref_=nv_sr_fn&q=' + film_search + '&s=tt&ref_=fn_al_tt_mr'
+    url_movie = 'https://www.imdb.com/find?ref_=nv_sr_fn&q=' + film_search + '&s=tt&ref_=fn_tt_ex&languages=en' #fn_al_tt_mr'
     resp = requests.get(url_movie)
-
     html_soup = BeautifulSoup(resp.text, 'html.parser')
     type(html_soup)
 
     movie_found = html_soup.find_all('td', class_='result_text')
     movie_list = []
     for i in movie_found:
+        #print(str(i))
         if '<td class="result_text"> <a href="/title' in str(i) and 'Episode' not in str(i) \
                 and '(Short)' not in str(i) and '(Video)' not in str(i) \
                 and '(TV Mini-Series' not in str(i) \
                 and '(TV Series)' not in str(i) and '(in development)' not in str(i) \
                 and '(Video Game)' not in str(i) and '(TV Movie)' not in str(i) \
-                and 'Documentary' not in str(i) and film_title in str(i) \
+                and 'Documentary' not in str(i)  and film_title in str(i) \
                 and film_title in str(i).split(">")[2].split("<")[0]:
                     movie_list.append([str(i).split(">")[1].strip('<a href="/title/'), str(i).split(">")[2].strip("</a")])
     return movie_list
 
 
-def get_film_details_page(tt, title):
+def get_film_details_page(tt, title) -> Movie:
     movie = Movie(tt, title)
     """Function that create sets of Movie objects that match film title
     :param tt:tt in imdb
     :param title:title of the movie"""
 
     url_movie = 'https://www.imdb.com/title/tt' + str(tt) + '/?ref_=fn_tt_tt_1'
-    print(url_movie)
+    movie.url_movie = url_movie
     resp = requests.get(url_movie)
     html_soup = BeautifulSoup(resp.text, 'html.parser')
     type(html_soup)
@@ -113,6 +116,15 @@ def get_film_details_page(tt, title):
                 artist = str(i).strip("</a")
                 movie.stars.append(artist)
 
+    # Extract storyline
+    try:
+        movie_sl_search = html_soup.find('div', id = 'main_bottom').find('div', id = 'titleStoryLine').find('div',class_ = 'inline canwrap').span.text
+        movie_storyline = ''
+        for i in movie_sl_search:
+            movie_storyline = movie_storyline + str(i)
+            movie.storyline = movie_storyline.lstrip(" ").lstrip(" ")
+    except AttributeError:
+        movie_storyline = ''
 
 
-    print(movie)
+    return movie
